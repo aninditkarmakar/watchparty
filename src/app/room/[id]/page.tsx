@@ -1,6 +1,7 @@
-type PageProps = {
-  params: Promise<{ id: string }>;
-};
+import React from "react";
+import { VideoFileSelector } from "./components/VideoFileSelector";
+import { VideoArea } from "./components/VideoArea";
+
 export default async function Page({
   params,
 }: {
@@ -8,5 +9,10 @@ export default async function Page({
 }) {
   const { id } = await params;
 
-  return <div>{`Room name: ${id}`}</div>;
+  return (
+    <div>
+      <p>{`Room name: ${id}`}</p>
+      <VideoArea />
+    </div>
+  );
 }
