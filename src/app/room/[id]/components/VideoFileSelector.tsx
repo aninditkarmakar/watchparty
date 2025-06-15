@@ -4,10 +4,11 @@ import { Input } from "@/components/ui/input";
 import React from "react";
 
 export type VideoFileSelectorProps = {
-  videoUrlCallback: (url: string | null) => void;
+  videoUrlCallback: (url: string | null, type?: string) => void;
 };
 
 export function VideoFileSelector(props: VideoFileSelectorProps) {
+  const { videoUrlCallback } = props;
   const [videoUrl, setVideoUrl] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -22,10 +23,10 @@ export function VideoFileSelector(props: VideoFileSelectorProps) {
       if (file) {
         const url = URL.createObjectURL(file);
         setVideoUrl(url);
-        props.videoUrlCallback(url);
+        videoUrlCallback(url, file.type);
       }
     },
-    []
+    [videoUrlCallback]
   );
 
   return (

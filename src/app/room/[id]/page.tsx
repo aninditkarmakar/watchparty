@@ -1,5 +1,4 @@
 import React from "react";
-import { VideoFileSelector } from "./components/VideoFileSelector";
 import { VideoArea } from "./components/VideoArea";
 
 export default async function Page({
@@ -10,7 +9,7 @@ export default async function Page({
   const { id } = await params;
 
   return (
-    <div>
+    <div className="h-full w-full">
       <p>{`Room name: ${id}`}</p>
       <VideoArea />
     </div>

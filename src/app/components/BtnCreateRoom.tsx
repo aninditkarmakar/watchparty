@@ -3,9 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Button } from "../../components/ui/button";
 
-export interface BtnCreateRoomProps {}
-
-export function BtnCreateRoom(props: BtnCreateRoomProps) {
+export function BtnCreateRoom() {
   const router = useRouter();
 
   const goToRoom = () => {
