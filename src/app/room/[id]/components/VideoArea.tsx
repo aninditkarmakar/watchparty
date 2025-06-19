@@ -23,12 +23,18 @@ export function VideoArea() {
   };
 
   // Event handlers for logging
-  const handlePlay = React.useCallback(() => {
-    setLogs((prev) => [`Play at ${new Date().toLocaleTimeString()}`, ...prev]);
+  const handlePlay = React.useCallback((time: number) => {
+    setLogs((prev) => [
+      `Play at ${time.toFixed(2)}s (${new Date().toLocaleTimeString()})`,
+      ...prev,
+    ]);
   }, []);
 
-  const handlePause = React.useCallback(() => {
-    setLogs((prev) => [`Pause at ${new Date().toLocaleTimeString()}`, ...prev]);
+  const handlePause = React.useCallback((time: number) => {
+    setLogs((prev) => [
+      `Paused at ${time.toFixed(2)}s (${new Date().toLocaleTimeString()})`,
+      ...prev,
+    ]);
   }, []);
 
   const handleSeek = React.useCallback((time: number) => {

@@ -90,20 +90,18 @@ export const VideoPlayer = React.forwardRef<
         playerRef.current.on("play", () => {
           console.log("play");
           if (!programmaticEventRef.current) {
+            programmaticEventRef.current = false; // Reset after handling
             onPlay(playerRef.current!.currentTime());
           }
-
-          programmaticEventRef.current = false; // Reset after handling
         });
       }
       if (onPause) {
         playerRef.current.on("pause", () => {
           console.log("pause");
           if (!programmaticEventRef.current) {
+            programmaticEventRef.current = false; // Reset after handling
             onPause(playerRef.current!.currentTime());
           }
-
-          programmaticEventRef.current = false; // Reset after handling
         });
       }
       if (onSeek) {
@@ -111,10 +109,9 @@ export const VideoPlayer = React.forwardRef<
           console.log("seeked");
 
           if (!programmaticEventRef.current) {
+            programmaticEventRef.current = false; // Reset after handling
             onSeek(playerRef.current!.currentTime());
           }
-
-          programmaticEventRef.current = false; // Reset after handling
         });
       }
     }
