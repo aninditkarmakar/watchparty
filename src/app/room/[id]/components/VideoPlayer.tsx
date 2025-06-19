@@ -14,12 +14,16 @@ export type VideoPlayerHandle = {
 export type VideoPlayerProps = {
   videoUrl: string;
   videoType: string;
+  onPlay?: () => void;
+  onPause?: () => void;
+  onSeek?: (time: number) => void;
 };
 
 export const VideoPlayer = React.forwardRef<
   VideoPlayerHandle,
   VideoPlayerProps
 >((props, ref) => {
+  const { videoUrl, videoType, onPlay, onPause, onSeek } = props;
   const videoRef = React.useRef<HTMLDivElement>(null);
   const playerRef = React.useRef<ReturnType<typeof videojs>>(null);
 
@@ -54,11 +58,27 @@ export const VideoPlayer = React.forwardRef<
         controls: true,
         sources: [
           {
-            src: props.videoUrl,
-            type: props.videoType,
+            src: videoUrl,
+            type: videoType,
           },
         ],
       });
+      // Add event listeners
+      if (onPlay) {
+        playerRef.current.on("play", () => {
+          onPlay();
+        });
+      }
+      if (onPause) {
+        playerRef.current.on("pause", () => {
+          onPause();
+        });
+      }
+      if (onSeek) {
+        playerRef.current.on("seeked", () => {
+          onSeek(playerRef.current!.currentTime());
+        });
+      }
     }
     return () => {
       if (playerRef.current && !playerRef.current.isDisposed()) {
@@ -66,7 +86,7 @@ export const VideoPlayer = React.forwardRef<
         playerRef.current = null;
       }
     };
-  }, [props.videoType, props.videoUrl]);
+  }, [videoType, videoUrl, onPlay, onPause, onSeek]);
 
   return <div ref={videoRef} />;
 });
