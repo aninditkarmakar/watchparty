@@ -3,6 +3,9 @@ import React from "react";
 import videojs from "video.js";
 
 import "video.js/dist/video-js.css";
+import { createDebouncedEventQueue } from "../utils";
+
+const DEBOUNCE_PERIOD = 500; // milliseconds
 
 export type VideoPlayerHandle = {
   play: (time?: number) => void;
@@ -85,33 +88,50 @@ export const VideoPlayer = React.forwardRef<
           },
         ],
       });
+
+      const { queueEvent, flush } = createDebouncedEventQueue<
+        "play" | "pause" | "seeked",
+        number
+      >(DEBOUNCE_PERIOD, (events) => {
+        if (events.findIndex((evt) => evt.type === "seeked") !== -1) {
+          onSeek(playerRef.current!.currentTime());
+          return;
+        }
+
+        for (const evt of events) {
+          if (evt.type === "play" && onPlay)
+            onPlay(playerRef.current!.currentTime());
+          if (evt.type === "pause" && onPause)
+            onPause(playerRef.current!.currentTime());
+        }
+      });
+
       // Add event listeners
       if (onPlay) {
         playerRef.current.on("play", () => {
-          console.log("play");
           if (!programmaticEventRef.current) {
-            programmaticEventRef.current = false; // Reset after handling
-            onPlay(playerRef.current!.currentTime());
+            queueEvent("play", playerRef.current!.currentTime());
           }
+
+          programmaticEventRef.current = false; // Reset after handling
         });
       }
       if (onPause) {
         playerRef.current.on("pause", () => {
-          console.log("pause");
           if (!programmaticEventRef.current) {
-            programmaticEventRef.current = false; // Reset after handling
-            onPause(playerRef.current!.currentTime());
+            queueEvent("pause", playerRef.current!.currentTime());
           }
+
+          programmaticEventRef.current = false; // Reset after handling
         });
       }
       if (onSeek) {
         playerRef.current.on("seeked", () => {
-          console.log("seeked");
-
           if (!programmaticEventRef.current) {
-            programmaticEventRef.current = false; // Reset after handling
-            onSeek(playerRef.current!.currentTime());
+            queueEvent("seeked", playerRef.current!.currentTime());
           }
+
+          programmaticEventRef.current = false; // Reset after handling
         });
       }
     }
