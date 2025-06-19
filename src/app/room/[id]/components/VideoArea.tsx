@@ -21,7 +21,10 @@ export function VideoArea() {
     <div className="w-full h-full">
       <VideoFileSelector videoUrlCallback={onVideoSelected} />
       {videoUrl ? (
-        <div id="videoPlayer" className="w-full h-full bg-amber-200">
+        <div
+          id="videoPlayerContainer"
+          className="max-h-screen bg-amber-200 flex items-center justify-center overflow-hidden"
+        >
           <VideoPlayer videoUrl={videoUrl} videoType={videoType} />
         </div>
       ) : (

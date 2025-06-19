@@ -17,9 +17,6 @@ export function VideoPlayer(props: VideoPlayerProps) {
     if (!playerRef.current) {
       const videoElement = document.createElement("video-js");
 
-      videoElement.classList.add("vjs-fluid");
-      videoElement.classList.add("h-full");
-      videoElement.classList.add("w-full");
       videoRef.current?.appendChild(videoElement);
 
       playerRef.current = videojs(videoElement, {
@@ -40,9 +37,5 @@ export function VideoPlayer(props: VideoPlayerProps) {
     };
   }, [props.videoType, props.videoUrl]);
 
-  return (
-    <div data-vjs-player className="w-full h-full bg-blue-300">
-      <div ref={videoRef} />
-    </div>
-  );
+  return <div ref={videoRef} />;
 }

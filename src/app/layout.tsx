@@ -4,9 +4,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full w-full">
-      <body className="w-full h-full">
-        <div className="w-full h-full bg-red-300">{children}</div>
+    <html lang="en">
+      <body className="min-h-screen bg-gray-200">
+        <div className="bg-red-300">{children}</div>
       </body>
     </html>
   );
