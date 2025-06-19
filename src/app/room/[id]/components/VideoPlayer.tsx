@@ -14,8 +14,8 @@ export type VideoPlayerHandle = {
 export type VideoPlayerProps = {
   videoUrl: string;
   videoType: string;
-  onPlay?: () => void;
-  onPause?: () => void;
+  onPlay?: (opts?: { triggeredBySeek?: boolean }) => void;
+  onPause?: (opts?: { triggeredBySeek?: boolean }) => void;
   onSeek?: (time: number) => void;
 };
 
@@ -26,6 +26,7 @@ export const VideoPlayer = React.forwardRef<
   const { videoUrl, videoType, onPlay, onPause, onSeek } = props;
   const videoRef = React.useRef<HTMLDivElement>(null);
   const playerRef = React.useRef<ReturnType<typeof videojs>>(null);
+  const seekingRef = React.useRef(false);
 
   React.useImperativeHandle(ref, () => ({
     play: () => {
@@ -36,6 +37,7 @@ export const VideoPlayer = React.forwardRef<
     },
     seekForward: (seconds: number) => {
       if (playerRef.current) {
+        seekingRef.current = true;
         playerRef.current.currentTime(
           playerRef.current.currentTime() + seconds
         );
@@ -43,6 +45,7 @@ export const VideoPlayer = React.forwardRef<
     },
     seekBackward: (seconds: number) => {
       if (playerRef.current) {
+        seekingRef.current = true;
         playerRef.current.currentTime(
           playerRef.current.currentTime() - seconds
         );
@@ -66,15 +69,27 @@ export const VideoPlayer = React.forwardRef<
       // Add event listeners
       if (onPlay) {
         playerRef.current.on("play", () => {
-          onPlay();
+          if (seekingRef.current) {
+            onPlay({ triggeredBySeek: true });
+            seekingRef.current = false;
+          } else {
+            onPlay();
+          }
         });
       }
       if (onPause) {
         playerRef.current.on("pause", () => {
-          onPause();
+          if (seekingRef.current) {
+            onPause({ triggeredBySeek: true });
+          } else {
+            onPause();
+          }
         });
       }
       if (onSeek) {
+        playerRef.current.on("seeking", () => {
+          seekingRef.current = true;
+        });
         playerRef.current.on("seeked", () => {
           onSeek(playerRef.current!.currentTime());
         });
