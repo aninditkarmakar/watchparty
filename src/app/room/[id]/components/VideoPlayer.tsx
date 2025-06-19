@@ -5,17 +5,18 @@ import videojs from "video.js";
 import "video.js/dist/video-js.css";
 
 export type VideoPlayerHandle = {
-  play: () => void;
-  pause: () => void;
+  play: (time?: number) => void;
+  pause: (time?: number) => void;
   seekForward: (seconds: number) => void;
   seekBackward: (seconds: number) => void;
+  seekTo: (time: number) => void;
 };
 
 export type VideoPlayerProps = {
   videoUrl: string;
   videoType: string;
-  onPlay?: (opts?: { triggeredBySeek?: boolean }) => void;
-  onPause?: (opts?: { triggeredBySeek?: boolean }) => void;
+  onPlay?: (time: number) => void;
+  onPause?: (time: number) => void;
   onSeek?: (time: number) => void;
 };
 
@@ -26,18 +27,30 @@ export const VideoPlayer = React.forwardRef<
   const { videoUrl, videoType, onPlay, onPause, onSeek } = props;
   const videoRef = React.useRef<HTMLDivElement>(null);
   const playerRef = React.useRef<ReturnType<typeof videojs>>(null);
-  const seekingRef = React.useRef(false);
+  const programmaticEventRef = React.useRef(false);
 
   React.useImperativeHandle(ref, () => ({
-    play: () => {
+    play: (time?: number) => {
+      programmaticEventRef.current = true;
+
+      if (time) {
+        playerRef.current.currentTime(time);
+      }
+
       playerRef.current?.play();
     },
-    pause: () => {
+    pause: (time?: number) => {
+      programmaticEventRef.current = true;
+
+      if (time) {
+        playerRef.current.currentTime(time);
+      }
+
       playerRef.current?.pause();
     },
     seekForward: (seconds: number) => {
       if (playerRef.current) {
-        seekingRef.current = true;
+        programmaticEventRef.current = true;
         playerRef.current.currentTime(
           playerRef.current.currentTime() + seconds
         );
@@ -45,10 +58,16 @@ export const VideoPlayer = React.forwardRef<
     },
     seekBackward: (seconds: number) => {
       if (playerRef.current) {
-        seekingRef.current = true;
+        programmaticEventRef.current = true;
         playerRef.current.currentTime(
           playerRef.current.currentTime() - seconds
         );
+      }
+    },
+    seekTo: (time: number) => {
+      if (playerRef.current) {
+        programmaticEventRef.current = true;
+        playerRef.current.currentTime(time);
       }
     },
   }));
@@ -69,29 +88,33 @@ export const VideoPlayer = React.forwardRef<
       // Add event listeners
       if (onPlay) {
         playerRef.current.on("play", () => {
-          if (seekingRef.current) {
-            onPlay({ triggeredBySeek: true });
-            seekingRef.current = false;
-          } else {
-            onPlay();
+          console.log("play");
+          if (!programmaticEventRef.current) {
+            onPlay(playerRef.current!.currentTime());
           }
+
+          programmaticEventRef.current = false; // Reset after handling
         });
       }
       if (onPause) {
         playerRef.current.on("pause", () => {
-          if (seekingRef.current) {
-            onPause({ triggeredBySeek: true });
-          } else {
-            onPause();
+          console.log("pause");
+          if (!programmaticEventRef.current) {
+            onPause(playerRef.current!.currentTime());
           }
+
+          programmaticEventRef.current = false; // Reset after handling
         });
       }
       if (onSeek) {
-        playerRef.current.on("seeking", () => {
-          seekingRef.current = true;
-        });
         playerRef.current.on("seeked", () => {
-          onSeek(playerRef.current!.currentTime());
+          console.log("seeked");
+
+          if (!programmaticEventRef.current) {
+            onSeek(playerRef.current!.currentTime());
+          }
+
+          programmaticEventRef.current = false; // Reset after handling
         });
       }
     }
